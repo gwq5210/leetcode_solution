@@ -1,1 +1,1 @@
-g++ -std=c++20 -o main "1114. 按序打印.cc" "1115. 交替打印FooBar.cc" main.cc -L/opt/homebrew/Cellar/googletest/1.13.0/lib -lgtest -I/opt/homebrew/Cellar/googletest/1.13.0/include
+g++ -std=c++20 -o main "1114. 按序打印.cc" "1115. 交替打印FooBar.cc" "1116. 打印零与奇偶数.cc" main.cc -L/opt/homebrew/Cellar/googletest/1.13.0/lib -lgtest -I/opt/homebrew/Cellar/googletest/1.13.0/include
