@@ -119,4 +119,32 @@ class Solution {
     }
     return result;
   }
+
+  int dieSimulator2(int n, std::vector<int>& roll_max) {
+    std::vector<std::vector<int>> dp(n, std::vector<int>(6));
+    for (int i = 0; i < 6; ++i) {
+      dp[0][i] = 1;
+    }
+    for (int i = 1; i < n; ++i) {                 // 第i次扔骰子
+      for (int j = 0; j < 6; ++j) {               // 出现的点数为j
+        if (i + 1 <= roll_max[j]) {
+            dp[i][j] = 1;
+        }
+        for (int k = 1; k <= roll_max[j]; ++k) {
+          if (i - k >= 0) {
+            for (int x = 0; x < 6; ++x) {
+              if (x != j) {
+                dp[i][j] = (dp[i][j] + dp[i - k][x]) % kMod;
+              }
+            }
+          }
+        }
+      }
+    }
+    int result = 0;
+    for (int i = 0; i < 6; ++i) {
+      result = (result + dp[n - 1][i]) % kMod;
+    }
+    return result;
+  }
 };
