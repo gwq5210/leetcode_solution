@@ -81,6 +81,31 @@ class Solution {
     int d = 0;
     bool operator>(const Node& node) const { return price > node.price; }
   };
+  int FindCheapestPriceBellmanFord(int n, std::vector<std::vector<int>>& flights, int src, int dst, int k) {
+    std::vector<std::vector<int>> dis(2, std::vector<int>(n, kInf));
+    int t = 0;
+    dis[t][src] = 0;
+    bool flag = false;
+    for (int i = 1; i <= k + 1; ++i) {
+      int p = t;
+      t = 1 - t;
+      dis[t] = dis[p];
+      for (auto& flight : flights) {
+        int from = flight[0];
+        int to = flight[1];
+        int price = flight[2];
+        if (dis[p][from] + price < dis[t][to]) {
+          dis[t][to] = dis[p][from] + price;
+          flag = true;
+        }
+      }
+      if (!flag) {
+        break;
+      }
+    }
+    return dis[t][dst] == kInf ? -1 : dis[t][dst];
+  }
+
   int findCheapestPrice(int n, std::vector<std::vector<int>>& flights, int src, int dst, int k) {
     // 使用邻接矩阵建图, adjs[u][v] > 0表示u到v有权值为adjs[u][v]的边
     std::vector<std::vector<int>> adjs(n, std::vector<int>(n));
