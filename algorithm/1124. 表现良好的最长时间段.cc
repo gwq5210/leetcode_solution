@@ -51,6 +51,7 @@
 #include <map>
 #include <numeric>
 #include <queue>
+#include <stack>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -59,6 +60,26 @@
 class Solution {
  public:
   int longestWPI(std::vector<int>& hours) {
+    int n = hours.size();
+    std::vector<int> prefix_sum(n + 1);
+    int res = 0;
+    std::stack<int> s;
+    s.push(0);
+    for (int i = 1; i <= n; ++i) {
+      prefix_sum[i] = prefix_sum[i - 1] + (hours[i - 1] > 8 ? 1 : -1);
+      if (prefix_sum[i] < prefix_sum[s.top()]) {
+        s.push(i);
+      }
+    }
+    for (int i = n; i >= 1; --i) {
+      while (!s.empty() && prefix_sum[s.top()] < prefix_sum[i]) {
+        res = std::max(res, i - s.top());
+        s.pop();
+      }
+    }
+    return res;
+  }
+  int longestWPI2(std::vector<int>& hours) {
     int n = hours.size();
     // prefix_sum[i] 表示下标[0,i)中超过8小时的个数和小于8小时个数的差
     int sum = 0;
