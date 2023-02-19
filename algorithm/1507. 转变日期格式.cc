@@ -71,6 +71,10 @@
 #include <vector>
 
 class Solution {
- public:
-  std::string reformatDate(std::string date) {}
+public:
+    string reformatDate(string date) {
+        std::unordered_map<std::string, std::string> months{
+            {"Jan", 1}, {"Feb", 2}, {"Mar", 3}, {"Apr", 4}, {"May", 5}, {"Jun", 6}, {"Jul", 7}, {"Aug", 8}, {"Sep", 9}, {"Oct", 10}, {"Nov", 11},  {"Dec", 12}
+        };
+    }
 };
