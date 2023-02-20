@@ -75,7 +75,7 @@ class Solution {
       return m > node.m;
     }
   };
-  std::vector<int> smallestRange(std::vector<std::vector<int>>& nums) {
+  std::vector<int> smallestRange1(std::vector<std::vector<int>>& nums) {
     std::priority_queue<Node> pq;
     int res_start = kInf;
     int res_end = -kInf;
@@ -100,6 +100,47 @@ class Solution {
       }
       end = std::max(end, nums[node.x][node.y]);
       pq.push({nums[node.x][node.y], node.x, node.y + 1});
+    }
+    return std::vector<int>{res_start, res_end};
+  }
+  std::vector<int> smallestRange(std::vector<std::vector<int>>& nums) {
+    std::map<int, std::vector<int>> indexs;
+    int nmin = kInf;
+    int nmax = -kInf;
+    for (int i = 0; i < nums.size(); ++i) {
+      for (int j = 0; j < nums[i].size(); ++j) {
+        indexs[nums[i][j]].emplace_back(i);
+        nmin = std::min(nmin, nums[i][j]);
+        nmax = std::max(nmax, nums[i][j]);
+      }
+    }
+    int count = 0;
+    std::vector<int> stats(nums.size());
+    int res_start = nmin;
+    int res_end = nmax;
+    for (int i = nmin; i <= nmax; ++i) {
+      if (!indexs.count(i)) {
+        continue;
+      }
+      for (int index : indexs[i]) {
+        ++stats[index];
+        if (stats[index] == 1) {
+          ++count;
+        }
+      }
+      while (count == nums.size()) {
+        if (i - nmin + 1 < res_end - res_start + 1) {
+          res_start = nmin;
+          res_end = i;
+        }
+        for (int index : indexs[nmin]) {
+          --stats[index];
+          if (stats[index] == 0) {
+            --count;
+          }
+        }
+        ++nmin;
+      }
     }
     return std::vector<int>{res_start, res_end};
   }
