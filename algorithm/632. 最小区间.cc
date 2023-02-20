@@ -75,6 +75,20 @@ class Solution {
       return m > node.m;
     }
   };
+  // 贪心 + 最小堆
+  // 给定 k 个列表，需要找到最小区间，使得每个列表都至少有一个数在该区间中。
+  // 该问题可以转化为，从 k 个列表中各取一个数，使得这 k 个数中的最大值与最小值的差最小。
+  // 假设这 k 个数中的最小值是第 i 个列表中的 x，对于任意 j!=i，设第 j 个列表中被选为 k 个数之一的数是 y
+  // 则为了找到最小区间，y 应该取第 j 个列表中大于等于 x 的最小的数，这是一个贪心的策略。
+  // 贪心策略的正确性简单证明如下：假设 z 也是第 j 个列表中的数，且 z>y，则有 z−x>y−x，同时包含 x
+  // 和 z 的区间一定不会小于同时包含 x 和 y 的区间。因此，其余 k−1 个列表中应该取大于等于 x 的最小的数。
+  // 由于 k 个列表都是升序排列的，因此对每个列表维护一个指针，通过指针得到列表中的元素
+  // 指针右移之后指向的元素一定大于或等于之前的元素。
+  // 使用最小堆维护 k 个指针指向的元素中的最小值，同时维护堆中元素的最大值。初始时，k 个指针都指向下标 0
+  // 最大元素即为所有列表的下标 0 位置的元素中的最大值。
+  // 每次从堆中取出最小值，根据最大值和最小值计算当前区间，如果当前区间小于最小区间则用当前区间更新最小区间
+  // 然后将对应列表的指针右移，将新元素加入堆中，并更新堆中元素的最大值。
+  // 如果一个列表的指针超出该列表的下标范围，则说明该列表中的所有元素都被遍历过，堆中不会再有该列表中的元素，因此退出循环。
   std::vector<int> smallestRange1(std::vector<std::vector<int>>& nums) {
     std::priority_queue<Node> pq;
     int res_start = kInf;
@@ -103,8 +117,12 @@ class Solution {
     }
     return std::vector<int>{res_start, res_end};
   }
+  // 哈希表 + 滑动窗口
+  // 与76. 最小覆盖子串题目类似
   std::vector<int> smallestRange(std::vector<std::vector<int>>& nums) {
-    std::map<int, std::vector<int>> indexs;
+    // indexs 的 key 是 nums 中的值，value 是该值在 nums 中出现的下标
+    std::unordered_map<int, std::vector<int>> indexs;
+    // nmin 和 nmax 分别表示 nums 中的最大值和最小值
     int nmin = kInf;
     int nmax = -kInf;
     for (int i = 0; i < nums.size(); ++i) {
@@ -114,14 +132,21 @@ class Solution {
         nmax = std::max(nmax, nums[i][j]);
       }
     }
+    // 我们需要找到最小的区间[res_start, res_end]，使得区间内的值对应的下标必须包括所有的[0, nums.size())
+    // count 表示区间内不同下标的数量
     int count = 0;
+    // stats 表示每个下标在区间 [nmin, i] 中出现元素的数目
     std::vector<int> stats(nums.size());
+    // 表示答案的区间 [res_start, res_end]
     int res_start = nmin;
     int res_end = nmax;
+    // 枚举区间的右边界
     for (int i = nmin; i <= nmax; ++i) {
+      // 值不在nums中，直接跳过
       if (!indexs.count(i)) {
         continue;
       }
+      // 更新 stats 的统计，如果某个下标的统计从 0 变为 1，则 count 需要加 1
       for (int index : indexs[i]) {
         ++stats[index];
         if (stats[index] == 1) {
@@ -129,10 +154,12 @@ class Solution {
         }
       }
       while (count == nums.size()) {
+        // 满足条件时更新答案和统计，并向右移动 nmin
         if (i - nmin + 1 < res_end - res_start + 1) {
           res_start = nmin;
           res_end = i;
         }
+        // 更新 stats 的统计，如果某个下标的统计从 1 变为 0，则 count 需要减 1
         for (int index : indexs[nmin]) {
           --stats[index];
           if (stats[index] == 0) {

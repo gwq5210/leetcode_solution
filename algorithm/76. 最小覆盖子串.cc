@@ -94,28 +94,43 @@ class Solution {
     return true;
   }
   std::string minWindow(std::string s, std::string t) {
+    // 维护两个数组，记录已有字符串指定字符的出现次数，和目标字符串指定字符的出现次数
     std::vector<int> target_stats(52);
     std::vector<int> source_stats(52);
+
+    // 将目标字符串指定字符的出现次数记录
     for (char c : t) {
       ++target_stats[CharToIndex(c)];
     }
+
+    // 答案表示的区间为[res_start, res_end]
     int res_start = 0;
     int res_end = s.size();
+    // 当前表示的区间为[start, end]
     int start = 0;
     int end = 0;
+    // s的子串是否可以涵盖t
     bool found = false;
+    // 枚举右边界end
     for (int end = 0; end < s.size(); ++end) {
+      // 将当前的字符加入统计
       ++source_stats[CharToIndex(s[end])];
+
+      // 向右移动start，不满足条件时才结束
       while (Check(target_stats, source_stats)) {
+        // 当前[start, end]满足要求，则使用[start, end]更新答案，并更新found
         if (res_end - res_start > end - start) {
           res_start = start;
           res_end = end;
           found = true;
         }
+        // 向右移动start，同时更新统计
         --source_stats[CharToIndex(s[start])];
         ++start;
       }
     }
-    return found ? s.substr(res_start, res_end - res_start) : "";
+
+    // 如果没找到直接返回空串
+    return found ? s.substr(res_start, res_end - res_start + 1) : "";
   }
 };
