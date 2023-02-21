@@ -47,9 +47,9 @@
  */
 #include <deque>
 #include <map>
-#include <set>
 #include <numeric>
 #include <queue>
+#include <set>
 #include <stack>
 #include <string>
 #include <unordered_map>
@@ -61,7 +61,7 @@ class MedianFinder {
   /** initialize your data structure here. */
   MedianFinder() {}
 
-  void addNum(int num) {
+  void addNum1(int num) {
     if (left_nums_.empty() || num <= *std::prev(left_nums_.end())) {
       left_nums_.emplace(num);
       if (right_nums_.size() + 1 < left_nums_.size()) {
@@ -78,7 +78,7 @@ class MedianFinder {
     ++count_;
   }
 
-  double findMedian() {
+  double findMedian1() {
     double res = *std::prev(left_nums_.end());
     if (count_ % 2 == 0) {
       res = (res + *right_nums_.begin()) / 2.0;
@@ -86,10 +86,90 @@ class MedianFinder {
     return res;
   }
 
+  void addNum2(int num) {
+    if (left_pq_.empty() || num <= left_pq_.top()) {
+      left_pq_.push(num);
+      if (left_pq_.size() > right_pq_.size() + 1) {
+        right_pq_.push(left_pq_.top());
+        left_pq_.pop();
+      }
+    } else {
+      right_pq_.push(num);
+      if (right_pq_.size() > left_pq_.size()) {
+        left_pq_.push(right_pq_.top());
+        right_pq_.pop();
+      }
+    }
+    ++count_;
+  }
+
+  double findMedian2() {
+    double res = left_pq_.top();
+    if (count_ % 2 == 0) {
+      res = (res + right_pq_.top()) / 2.0;
+    }
+    return res;
+  }
+
+  void addNum(int num) {
+    nums_.emplace(num);
+    ++count_;
+    if (count_ == 1) {
+      left_ = nums_.begin();
+      right_ = nums_.begin();
+    } else {
+      if (count_ % 2 == 0) {  // 当前数量是偶数
+        if (num < *left_) {
+          // 2 -> 1,2
+          --left_;
+        } else {  // num >= *right_
+          // 2 -> 2,3
+          // 2 -> 2,2
+          ++right_;
+        }
+      } else {  // 当前数量是奇数
+        if (num < *left_) {
+          // 2,3 -> 1,2,3
+          --right_;
+        } else if (num >= *right_) {
+          // 2,3 -> 2,3,4
+          // 2,3 -> 2,3,3
+          ++left_;
+        } else {  // num == *left_
+                  // 2,3 -> 2,2,3
+          ++left_;
+          --right_;
+        }
+      }
+    }
+  }
+
+  double findMedian() {
+    double res = *left_;
+    if (count_ % 2 == 0) {
+      res = (res + *right_) / 2.0;
+    }
+    return res;
+  }
+
  private:
   int count_ = 0;
+  // 两个有序集合，将所有的数字分成两部分，这和使用两个优先队列的情况类似
+  // left_nums_ 中的数字都小于或等于 right_nums_ 中的数字
+  // 当 count_ 为偶数时，left_nums_.size == right_nums_.size()
+  // 当 count_ 为奇数时，left_nums_.size == right_nums_.size() + 1
   std::multiset<int> left_nums_;
   std::multiset<int> right_nums_;
+  std::priority_queue<int> left_pq_;
+  std::priority_queue<int, std::vector<int>, std::greater<int>> right_pq_;
+  // 一个有序集合存储所有的元素
+  // 双指针指向中位数
+  // 当 count_ 为偶数时，left_ 和 right_ 分别指向构成中位数的两个数
+  // 当 count_ 为奇数时，left_ 和 right_ 指向同一个元素
+  // multiset 插入相等元素时，插入范围的上界
+  std::multiset<int>::iterator left_;
+  std::multiset<int>::iterator right_;
+  std::multiset<int> nums_;
 };
 
 /**
