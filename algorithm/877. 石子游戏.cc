@@ -69,7 +69,34 @@
 
 class Solution {
  public:
+  // 可以将石子根据下标的奇偶分成两组
+  // 第一轮先手可以选择 A 组或 B 组后，剩下玩家只能选择余下的组
+  // 下一轮，先手玩家又可以在两组之间自由选择
+  // 根据上述分析可知，作为先手的 Alice 可以在第一次取走石子时就决定取走哪一组的石子，并全程取走同一组的石子。
+  // 既然如此，Alice 是否有必胜策略？
+  // 答案是肯定的。将石子分成两组之后，可以计算出每一组的石子数量，同时知道哪一组的石子数量更多。
+  // Alice 只要选择取走数量更多的一组石子即可。因此，Alice 总是可以赢得比赛。
   bool stoneGame(std::vector<int>& piles) {
+    std::vector<std::vector<int>> dp(piles.size(), std::vector<int>(piles.size(), -1));
+    std::vector<int> prefix_sums(piles.size() + 1);
+    for (int i = 0; i < piles.size(); ++i) {
+      dp[i][i] = piles[i];
+      prefix_sums[i + 1] = prefix_sums[i] + piles[i];
+    }
+    // 从小到大枚举左右端点的间距
+    for (int i = 1; i < piles.size(); ++i) {
+      for (int j = 0; j + i < piles.size(); ++j) {
+        // 表示区间 [l, r]
+        int l = j;
+        int r = j + i;
+        dp[l][r] = prefix_sums[r + 1] - prefix_sums[l] - std::min(dp[l][r - 1], dp[l + 1][r]);
+      }
+    }
+    int a = dp[0][piles.size() - 1];
+    int b = prefix_sums[piles.size()] - a;
+    return a > b;
+  }
+  bool stoneGameDFS(std::vector<int>& piles) {
     std::vector<std::vector<int>> dp(piles.size(), std::vector<int>(piles.size(), -1));
     int total = std::accumulate(piles.begin(), piles.end(), 0);
     return DFS(piles, 0, piles.size() - 1, total, dp);

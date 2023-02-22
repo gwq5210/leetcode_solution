@@ -88,27 +88,44 @@ class Solution {
  public:
   static constexpr int kInf = std::numeric_limits<int>::max() / 2;
   std::string stoneGameIII(std::vector<int>& stoneValue) {
-    std::vector<std::vector<int>> dp(stoneValue.size(), std::vector<int>(4, -kInf));
-    int total = std::accumulate(stoneValue.begin(), stoneValue.end(), 0);
-    int a = DFS(stoneValue, 0, 3, total, dp);
+    int n = stoneValue.size();
+    std::vector<int> dp(stoneValue.size() + 1);
+    int total = 0;
+    dp[0] = 0;
+    for (int i = n - 1; i >= 0; --i) {
+      total += stoneValue[i];
+      int min_v = kInf;
+      for (int j = 1; j <= 3 && i + j <= n; ++j) {
+        min_v = std::min(min_v, dp[i + j]);
+      }
+      dp[i] = total - min_v;
+    }
+    int a = dp[0];
     int b = total - a;
     return a > b ? "Alice" : a < b ? "Bob" : "Tie";
   }
-  int DFS(const std::vector<int>& stoneValue, int index, int count, int total, std::vector<std::vector<int>>& dp) {
+  std::string stoneGameIIIDFS(std::vector<int>& stoneValue) {
+    std::vector<int> dp(stoneValue.size(), -kInf);
+    int total = std::accumulate(stoneValue.begin(), stoneValue.end(), 0);
+    int a = DFS(stoneValue, 0, total, dp);
+    int b = total - a;
+    return a > b ? "Alice" : a < b ? "Bob" : "Tie";
+  }
+  int DFS(const std::vector<int>& stoneValue, int index, int total, std::vector<int>& dp) {
     // 注意处理负数的情况
     if (index >= stoneValue.size()) {
       return total;
     }
-    if (dp[index][count] != -kInf) {
-      return dp[index][count];
+    if (dp[index] != -kInf) {
+      return dp[index];
     }
     int v = kInf;
     int c = 0;
-    for (int i = 1; i <= count && index + i <= stoneValue.size(); ++i) {
+    for (int i = 1; i <= 3 && index + i <= stoneValue.size(); ++i) {
       c += stoneValue[index + i - 1];
-      v = std::min(v, DFS(stoneValue, index + i, 3, total - c, dp));
+      v = std::min(v, DFS(stoneValue, index + i, total - c, dp));
     }
-    dp[index][count] = total - v;
+    dp[index] = total - v;
     return total - v;
   }
 };

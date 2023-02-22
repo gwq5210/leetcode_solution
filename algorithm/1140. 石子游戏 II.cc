@@ -64,8 +64,30 @@
 
 class Solution {
  public:
+  static constexpr int kInf = std::numeric_limits<int>::max() / 2;
   std::vector<std::vector<int>> dp;
   int stoneGameII(std::vector<int>& piles) {
+    int n = piles.size();
+    dp = std::vector<std::vector<int>>(101, std::vector<int>(202, -1));
+    int total = 0;
+    // dp[i][m] 表示当 M 为 m 时，区间为 [i, piles.size()) 可以取到的最大数量
+    for (int i = n - 1; i >= 0; --i) {
+      total += piles[i];
+      for (int m = 1; m <= n; ++m) {
+        if (2 * m >= n - i) {
+          dp[i][m] = total;
+          continue;
+        }
+        int min_v = kInf;
+        for (int x = 1; x <= 2 * m && i + x < n; ++x) {
+          min_v = std::min(min_v, dp[i + x][std::max(x, m)]);
+        }
+        dp[i][m] = total - min_v;
+      }
+    }
+    return dp[0][1];
+  }
+  int stoneGameIIDFS(std::vector<int>& piles) {
     int total = 0;
     for (int i : piles) {
       total += i;
