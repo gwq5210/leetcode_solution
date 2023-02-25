@@ -76,21 +76,30 @@
 class Solution {
  public:
   int canCompleteCircuit(std::vector<int>& gas, std::vector<int>& cost) {
-    int total_gas = 0;
-    int init_gas = 0;
-    for (int i = 0; i < gas.size(); ++i) {
-      total_gas += gas[i] - cost[i];
-      init_gas = std::min(init_gas, total_gas);
-    }
-    if (init_gas >= 0) {
-      return 0;
-    }
-    init_gas = -init_gas;
-    for (int i = 1; i < gas.size(); ++i) {
-      init_gas += gas[i - 1] - cost[i - 1];
-      if (init_gas <= 0) {
+    int n = gas.size();
+    int i = 0;
+    bool flag = false;
+    // 直观理解，不用公式推导。可以这样想：假设从 x 加油站出发经过 z 加油站最远能到达 y 加油站
+    // 那么从 z 加油站直接出发，一定不可能到达 y 下一个加油站。
+    // 因为从 x 出发到 z 加油站时可能还有存储的油，这都到不了 y 的下一站
+    // 而直接从 z 出发刚开始是没有存储的油的，所以更不可能到达 y 的下一站。
+    // 因此我们从位置 i 开始遍历检查能否转一圈，如果只能到达位置 x，下一次直接从 x + 1 的位置进行检查即可
+    while (i < gas.size()) {
+      int curr_gas = 0;
+      int j = 0;
+      flag = true;
+      for (j = 0; j < n; ++j) {
+        int idx = (j + i) % n;
+        if (curr_gas + gas[idx] < cost[idx]) {
+          flag = false;
+          break;
+        }
+        curr_gas += gas[idx] - cost[idx];
+      }
+      if (flag) {
         return i;
       }
+      i = j + i + 1;
     }
     return -1;
   }
