@@ -80,6 +80,7 @@ class Solution {
     if (grid[0][1] > 1 && grid[1][0] > 1) {
       return -1;
     }
+    std::vector<std::vector<int>> vis(m, std::vector<int>(n));
     std::vector<std::vector<int>> dis(m, std::vector<int>(n, kInf));
     std::priority_queue<Node> pq;
     pq.push(Node{0, 0, 0});
@@ -87,9 +88,10 @@ class Solution {
       Node top = pq.top();
       pq.pop();
       // 已经求出最小值的节点就直接跳过
-      if (dis[top.x][top.y] <= top.d) {
+      if (vis[top.x][top.y]) {
         continue;
       }
+      vis[top.x][top.y] = true;
       for (int i = 0; i < 4; ++i) {
         Node new_node{top.x + dx[i], top.y + dy[i], top.d + 1};
         if (new_node.x >= 0 && new_node.x < m && new_node.y >= 0 && new_node.y < n) {
