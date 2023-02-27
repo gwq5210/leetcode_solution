@@ -75,6 +75,57 @@ class Solution {
     int n = nums1.size() + nums2.size();
     // 前半部分数的数量
     int target_count = (n + 1) / 2;
+    // 前半部分数的最大值和后半部分数的最小值
+    int left_max = 0;
+    int right_min = 0;
+    // 枚举 nums1 的区间下标，其取值范围是 [-1, nums1.size())
+    // 取值 -1 表示前半部分数全部在 nums2 中
+    // 取值 nums1.size()-1 表示前半部分数全部在 nums1 中
+    int l = -1;
+    int r = nums1.size();
+    while (l <= r) {
+      // [0, mid] 和 [0, rmid] 组成的 target_count 个数是否满足要求
+      int mid = l + (r - l) / 2;
+      int rmid = target_count - (mid + 1) - 1;
+      // l_max1 分别 l_max2 表示 nums1 和 nums2 前半部分的最大值
+      // 边界条件时取 -kInf
+      int l_max1 = mid >= 0 ? nums1[mid] : -kInf;
+      int l_max2 = rmid >= 0 ? nums2[rmid] : -kInf;
+      // r_min1 分别 r_min2 表示 nums1 和 nums2 后半部分的最小值
+      // 边界条件时取 kInf
+      int r_min1 = mid + 1 < nums1.size() ? nums1[mid + 1] : kInf;
+      int r_min2 = rmid + 1 < nums2.size() ? nums2[rmid + 1] : kInf;
+      // 已经满足要求，则直接返回结果即可
+      // 因为数组 nums1 和 nums2 递增，则一定有 l_max1 <= r_min1, l_max2 <= r_min2
+      if (l_max1 <= r_min2 && l_max2 <= r_min1) {
+        left_max = std::max(l_max1, l_max2);
+        right_min = std::min(r_min1, r_min2);
+        break;
+      // 如果 l_max1 > r_min2，则满足要求的下标一定在 [l, mid) 之间
+      } else if (l_max1 > r_min2) {
+        r = mid;
+      // 如果 l_max2 > r_min1，则满足要求的下标一定在 [mid+1, r) 之间
+      } else {
+        l = mid + 1;
+      }
+    }
+    // 分别针对元素总数为奇数或偶数进行处理
+    double res = left_max;
+    if (n % 2 == 0) {
+      res = (res + right_min) / 2.0;
+    }
+    return res;
+  }
+  // 1,2,3
+  // 1,2,3,4
+  double findMedianSortedArrays2(std::vector<int>& nums1, std::vector<int>& nums2) {
+    if (nums1.size() > nums2.size()) {
+      return findMedianSortedArrays(nums2, nums1);
+    }
+    // 元素总数
+    int n = nums1.size() + nums2.size();
+    // 前半部分数的数量
+    int target_count = (n + 1) / 2;
     // 表示 [0, res_l1], [0, res_l2] 组成的区间包含 target_count 数量的数
     // 并且且小于或等于区间 [res_l1+1, nums1.size()), [res_l2+1, nums2.size()) 中的数
     int res_l1 = -1;
