@@ -65,8 +65,85 @@
 
 class Solution {
  public:
+  int OpCmp(char lop, char rop) {
+    static std::unordered_map<char, int> ops{{'+', 1}, {'-', 1}, {'*', 2}, {'/', 2}, {'%', 2}};
+    return ops[lop] - ops[rop];
+  }
+  bool IsOp(char op) { return op == '+' || op == '-' || op == '*' || op == '/'; }
+  int Calc(int x, char op, int y) {
+    switch (op) {
+      case '+':
+        return x + y;
+      case '-':
+        return x - y;
+      case '*':
+        return x * y;
+      case '/':
+        return x / y;
+      case '%':
+        return x % y;
+      default:
+        return 0;
+    }
+    return 0;
+  }
+  void CalcTop(std::stack<char>& op, std::stack<long long>& nums) {
+    int y = nums.top();
+    nums.pop();
+    int x = 0;
+    if (!nums.empty()) {
+      x = nums.top();
+      nums.pop();
+    }
+    int v = Calc(x, op.top(), y);
+    op.pop();
+    nums.push(v);
+  }
+  void PreProcess(std::string& s) {
+    int count = 0;
+    for (int i = 0; i < s.size(); ++i) {
+      if (!std::isspace(s[i])) {
+        s[count++] = s[i];
+      }
+    }
+    s.resize(count);
+  }
   int calculate(std::string s) {
+    PreProcess(s);
+
     std::stack<char> op;
-    std::stack<int> nums;
+    std::stack<long long> nums;
+    nums.push(0);
+
+    for (int i = 0; i < s.size(); ++i) {
+      if (s[i] == '(') {
+        op.push(s[i]);
+        if (s[i + 1] == '+' || s[i + 1] == '-') {
+          nums.push(0);
+        }
+      } else if (s[i] == ')') {
+        while (op.top() != '(') {
+          CalcTop(op, nums);
+        }
+        op.pop();
+      } else if (IsOp(s[i])) {
+        while (!op.empty() && OpCmp(op.top(), s[i]) >= 0) {
+          CalcTop(op, nums);
+        }
+        op.push(s[i]);
+      } else if (std::isdigit(s[i])) {
+        long long v = 0;
+        while (i < s.size() && std::isdigit(s[i])) {
+          v = v * 10 + s[i] - '0';
+          ++i;
+        }
+        nums.push(v);
+        --i;
+      }
+    }
+    while (!op.empty()) {
+      CalcTop(op, nums);
+    }
+    return nums.top();
   }
 };
