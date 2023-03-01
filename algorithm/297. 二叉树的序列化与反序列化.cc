@@ -80,7 +80,7 @@ struct TreeNode {
   TreeNode(int x) : val(x), left(NULL), right(NULL) {}
 };
 
-class Codec {
+class Codec1 {
  public:
   struct EdgeInfo {
     int from_id = 0;
@@ -222,6 +222,71 @@ class Codec {
     // std::string tree_str = serialize(nodes[0]);
     // printf("tree_str %s\n", tree_str.c_str());
     return nodes[0];
+  }
+};
+
+class Codec {
+ public:
+  // 选择前序遍历，是因为 根∣左∣右 的打印顺序，在反序列化时更容易定位出根节点的值。
+  // 遇到 null 节点也要翻译成特定符号，反序列化时才知道这里是 null。
+  // Encodes a tree to a single string.
+  std::string serialize(TreeNode* root) {
+    if (root == nullptr) {
+      return "X";
+    }
+    std::string left_result = serialize(root->left);
+    std::string right_result = serialize(root->right);
+    std::string result = std::to_string(root->val) + "," + left_result + "," + right_result;
+    // printf("%s\n", result.c_str());
+    return result;
+  }
+
+  // 序列化的过程，左右子树一定是以两个 X 结尾（两个空节点结尾），因此 index 一定不会超过 tokens 的大小
+  TreeNode* DeserializeDFS(std::vector<std::string_view>& tokens, int& index) {
+    if (tokens[index] == "X") {
+      ++index;
+      return nullptr;
+    }
+    std::string_view token = tokens[index];
+    int i = 0;
+    int flag = 1;
+    int value = 0;
+    if (token[i] == '-') {
+      flag = -1;
+      ++i;
+    } else if (token[i] == '+') {
+      ++i;
+    }
+    while (i < token.size()) {
+      value = value * 10 + token[i] - '0';
+      ++i;
+    }
+    value *= flag;
+    TreeNode* root = new TreeNode(value);
+    ++index;
+    root->left = DeserializeDFS(tokens, index);
+    root->right = DeserializeDFS(tokens, index);
+    return root;
+  }
+
+  // Decodes your encoded data to tree.
+  TreeNode* deserialize(std::string data) {
+    if (data == "X") {
+      return nullptr;
+    }
+    std::vector<std::string_view> tokens;
+    int left = 0;
+    while (left < data.size()) {
+      int right = left;
+      while (right < data.size() && data[right] != ',') {
+        ++right;
+      }
+      tokens.emplace_back(data.c_str() + left, right - left);
+      left = right + 1;
+    }
+  
+    int index = 0;
+    return DeserializeDFS(tokens, index);
   }
 };
 
