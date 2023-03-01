@@ -80,25 +80,36 @@
 
 class Solution {
  public:
+  static constexpr int kInf = std::numeric_limits<int>::max() / 2;
   int connectTwoGroups(std::vector<std::vector<int>>& cost) {
     int m = cost.size();
     int n = cost[0].size();
     int count = 1 << n;
-    std::vector<std::vector<int>> dp(cost.size(), std::vector<int>(count));
-    for (int i = 0; i < m; ++i) {
-      for (int j = 1; j < count; ++j) {
-        int sum = 0;
-        for (int j = 0; j < n; ++j) {
-          if ((i >> j) & 1) {
-            sum += cost[0][j];
-          }
-        }
-        dp[i][j] = sum;
-        if (i > 0) {
-          dp[i][j] += dp[i - 1][(~j) & (count - 1)];
+    // dp[i][j] 表示为已选 i 行，列选取情况位掩码为 j 下的最小成本
+    // 边界条件是 dp[0][0] = 0;，其他情况取最大值
+    // 转移方程如下，其中 m 表示不选择下标为 k 的列，枚举 k 即可
+    // dp[i][j] = std::min(dp[i - 1][m], dp[i-1][j]) + cost[i - 1][k];
+    // 总得来说，可以使用如下转移方程，x = j | (1 << k);
+    // dp[i][x] = std::min(dp[i][x], dp[i - 1][j] + cost[i - 1][k]);
+    // 这种情况是第 i 行只能选择一行
+    // 对于特定行，如果选了2列，就可以看成只选1列的基础上，再额外加上1列的成本。
+    // 类似的选了k列的成本，也就是k-1列的基础上额外加了1列的成本。
+    // 这样我们可以在同一行内进行状态转移，只需在原代码的基础上做1处改动即可
+    // 即 dp[i][x] 不但可以是 dp[i-1][j]+cost[i-1][k]，也可以是 dp[i-1][j]+cost[i-1][k]。
+    // 注意 x 不可能比 j 小，如果 x>j，由于 x 是从小到大枚举的，计算 dp[i][x] 时，dp[i][j]必然是最优的了可以放心转移
+    // 如果 x==j，由于矩阵元素不为负，不可能转移到错误的状态。
+    std::vector<std::vector<int>> dp(cost.size() + 1, std::vector<int>(count, kInf));
+    dp[0][0] = 0;
+    for (int i = 1; i <= m; ++i) {
+      // 需要从 0 开始枚举，边界条件 0，可以转换到有效状态 x
+      for (int j = 0; j < count; ++j) {
+        for (int k = 0; k < n; ++k) {
+          int x = j | (1 << k);
+          dp[i][x] = std::min(dp[i][x], dp[i - 1][j] + cost[i - 1][k]);
+          dp[i][x] = std::min(dp[i][x], dp[i][j] + cost[i - 1][k]);
         }
       }
     }
-    return dp[m - 1][count - 1];
+    return dp[m][count - 1];
   }
 };
