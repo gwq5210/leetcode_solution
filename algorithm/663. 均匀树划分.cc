@@ -90,6 +90,8 @@
  */
 class Solution {
  public:
+  // 两次遍历，第一次计算出所有节点的和
+  // 第二次检查某个子树的和是否为总和的一半
   bool checkEqualTree(TreeNode* root) {
     if (root == nullptr) {
       return false;
