@@ -1,27 +1,23 @@
 /*
- * @lc app=leetcode.cn id=51 lang=cpp
+ * @lc app=leetcode.cn id=52 lang=cpp
  *
- * [51] N 皇后
+ * [52] N 皇后 II
  *
- * https://leetcode.cn/problems/n-queens/description/
+ * https://leetcode.cn/problems/n-queens-ii/description/
  *
  * algorithms
- * Hard (74.24%)
- * Likes:    1664
+ * Hard (82.45%)
+ * Likes:    414
  * Dislikes: 0
- * Total Accepted:    285.3K
- * Total Submissions: 384.6K
+ * Total Accepted:    113.8K
+ * Total Submissions: 137.9K
  * Testcase Example:  '4'
  *
- * 按照国际象棋的规则，皇后可以攻击与之处在同一行或同一列或同一斜线上的棋子。
+ * n 皇后问题 研究的是如何将 n 个皇后放置在 n × n 的棋盘上，并且使皇后彼此之间不能相互攻击。
  *
- * n 皇后问题 研究的是如何将 n 个皇后放置在 n×n 的棋盘上，并且使皇后彼此之间不能相互攻击。
- *
- * 给你一个整数 n ，返回所有不同的 n 皇后问题 的解决方案。
+ * 给你一个整数 n ，返回 n 皇后问题 不同的解决方案的数量。
  *
  *
- *
- * 每一种解法包含一个不同的 n 皇后问题 的棋子放置方案，该方案中 'Q' 和 '.' 分别代表了皇后和空位。
  *
  *
  *
@@ -29,7 +25,7 @@
  *
  *
  * 输入：n = 4
- * 输出：[[".Q..","...Q","Q...","..Q."],["..Q.","Q...","...Q",".Q.."]]
+ * 输出：2
  * 解释：如上图所示，4 皇后问题存在两个不同的解法。
  *
  *
@@ -37,7 +33,7 @@
  *
  *
  * 输入：n = 1
- * 输出：[["Q"]]
+ * 输出：1
  *
  *
  *
@@ -71,11 +67,11 @@ class Solution {
     return res;
   }
   std::pair<int, int> Get(int x) { return std::make_pair(x >> 4, x & 0xf); }
-  std::vector<std::vector<std::string>> solveNQueens(int n) {
+  int totalNQueens(int n) {
     std::vector<std::vector<std::string>> ans;
     std::vector<std::string> qmap(n, std::string(n, '.'));
     DFS(n, ans, 0, qmap);
-    return ans;
+    return ans.size();
   }
   std::vector<std::vector<std::string>> solveNQueens1(int n) {
     std::vector<std::vector<std::string>> ans;
