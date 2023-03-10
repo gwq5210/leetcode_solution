@@ -90,29 +90,97 @@ class Solution {
     int res = n;
     int prefix = 0;
     std::unordered_map<int, int> idxs;
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i <= n; ++i) {
+      idxs[prefix] = i;
       int y = (p - t) % p;
       if (idxs.count(y)) {
-        res = std::min(res, i - idxs[y] - 1);
+        res = std::min(res, i - idxs[y]);
       }
-      prefix = (prefix + nums[i]) % p;
+      if (i < n) {
+        // 分别更新前缀和与后缀和
+        prefix = (prefix + nums[i]) % p;
+        t = (t - nums[i] % p + p) % p;
+      }
+    }
+    return res == n ? -1 : res;
+  }
+  int minSubarray3(std::vector<int>& nums, int p) {
+    int n = nums.size();
+    int t = 0;
+    for (int num : nums) {
+      t = (t + num) % p;
+    }
+    if (t == 0) {
+      return 0;
+    }
+    int res = n;
+    int prefix = 0;
+    std::unordered_map<int, int> idxs;
+    for (int i = 0; i <= n; ++i) {
       idxs[prefix] = i;
-      t = (t - nums[i] + p) % p;
+      int y = (p - t) % p;
+      if (idxs.count(y)) {
+        res = std::min(res, i - idxs[y]);
+      }
+      if (i < n) {
+        // 分别更新前缀和与后缀和
+        prefix = (prefix + nums[i]) % p;
+        t = (t - nums[i] % p + p) % p;
+      }
+    }
+    return res == n ? -1 : res;
+  }
+  int minSubarray2(std::vector<int>& nums, int p) {
+    int n = nums.size();
+    // suffix[i] 表示区间 [i, nums.size()) 的和模 p 的余数
+    std::vector<int> suffix(n + 1);
+    for (int i = n - 1; i >= 0; --i) {
+      suffix[i] = (suffix[i + 1] + nums[i]) % p;
+    }
+    // idxs[k] = r, 记录满足区间 [0, j) 的和模 p 的余数是 k 的所有 j 中的最大值
+    std::unordered_map<int, int> idxs;
+    int res = n;
+    // sum 表示区间 [0, i) 的和模 p 的余数
+    int sum = 0;
+    // i 为 n 时，表示后缀长度是 0
+    for (int i = 0; i <= n; ++i) {
+      idxs[sum] = i;
+      if (i < n) {
+        sum = (sum + nums[i]) % p;
+      }
+      // x 表示区间 [i, nums.size()) 的和模 p 的余数
+      int x = suffix[i];
+      // 则我们可以在 idxs 中找到一个 y
+      // 若其对应的前缀区间为 [0, j)，则这个区间和 [i, nums.size()) 两个区间的和就可以被 p 整除
+      // 删除的区间是 [j, i)，其长度是 i - j;
+      int y = (p - x) % p;
+      if (idxs.count(y)) {
+        res = std::min(res, i - idxs[y]);
+      }
     }
     return res == n ? -1 : res;
   }
   int minSubarray1(std::vector<int>& nums, int p) {
     int n = nums.size();
+    // suffix[i] 表示区间 [i, nums.size()) 的和模 p 的余数
     std::vector<int> suffix(n + 1);
     for (int i = n - 1; i >= 0; --i) {
       suffix[i] = (suffix[i + 1] + nums[i]) % p;
     }
+    // idxs[k] = r, 记录满足区间 [0, j] 的和模 p 的余数是 k 的所有 j 中的最大值
     std::unordered_map<int, int> idxs;
+    // 初始时不包含任何区间, 边界条件
     idxs[0] = -1;
     int res = kInf;
+    // 这里前缀和可以优化
+    // sum 表示区间 [0, i] 的和模 p 的余数
     int sum = 0;
     for (int i = 0; i <= n; ++i) {
+      // x 表示区间 [i, nums.size()) 的和模 p 的余数
       int x = suffix[i];
+      // 则我们可以在 idxs 中找到一个 y
+      // 若其对应的前缀区间为 [0, j]，则这个区间和 [i, nums.size()) 两个区间的和就可以被 p 整除
+      // 删除的区间是 (j, i)，其长度是 i - j - 1;
       int y = (p - x) % p;
       if (idxs.count(y)) {
         res = std::min(res, i - idxs[y] - 1);
