@@ -40,6 +40,7 @@ class Solution {
     // 分别表示数字和字母的数量
     int a = 0;
     int b = 0;
+    // 也可以遇见字母加 1，遇见数字减 1
     // key 是字母比数字多的数量
     // value 是区间 [0, i) 中字母比数字多 key 个的下标中最小的 i
     std::unordered_map<int, int> idxs;
